@@ -1,15 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Badge } from "./ui/badge";
 interface TripProps {
   departureDate?: string;
   departureTime?: string;
@@ -21,7 +14,6 @@ interface TripProps {
   businessPrice?: number;
   onBookNow?: () => void;
 }
-
 export default function Trip({
   departureDate,
   departureTime,
@@ -33,41 +25,79 @@ export default function Trip({
   businessPrice,
   onBookNow,
 }: TripProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [bookingInfo, setBookingInfo] = useState([]);
+  const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
+
   const COLORS = {
     primary: "#364F6B",
     secondary: "#3FC1C9",
     light: "#F5F5F5",
     accent: "#FC5185",
   };
-  const handleSeatClick = () => (
-    <div className="relative">
-      <div className="absolute top-0 z-50 w-64 shadow-lg border-0">
-        <div className="bg-white  -b py-2 px-4 font-medium">Select Gender for Seat {/* seatNumber */}</div>
-        <div className="p-3">
-          <div className="flex justify-around gap-3">
-            {["male", "female"].map((gender) => (
-              <div key={gender} className="text-center p-2 rounded cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-5 h-5 rounded-sm"
-                    style={{
-                      backgroundColor: gender === "male" ? "/* COLORS.primary */" : "/* COLORS.accent */",
-                    }}
-                  />
-                  <span>{gender.charAt(0).toUpperCase() + gender.slice(1)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const handleSeatClick = (event, seatNumber: number) => {
+    const isAlreadySelected = bookingInfo.some(
+      (seat: { seatNumber: number }) => seat.seatNumber === seatNumber
+    );
+
+    if (isAlreadySelected) {
+      setBookingInfo((prev) => prev.filter((seat: { seatNumber: number }) => seat.seatNumber !== seatNumber));
+      setSelectedSeat(null);
+    } else {
+      console.log("elseee");
+      setSelectedSeat(selectedSeat == seatNumber ? null : seatNumber);
+    }
+  };
+  function transformSeatsData(data) {
+    return data?.map((item) => ({
+      seat_numbers: item?.booked_seats?.[0]?.seat_no || [],
+      genders: item?.booked_seats?.[0]?.gender || [],
+      status: item?.status || "unknown",
+    }));
+  }
+  const getSeatInfo = (seatNum: number) => {
+    if (!bookingInfo) return { reserved: false, gender: null };
+    const reservations = transformSeatsData(bookingInfo);
+
+    const existingReservation = reservations.find((reservation) =>
+      reservation.seat_numbers.includes(seatNum)
+    );
+
+    if (existingReservation) {
+      const index = existingReservation.seat_numbers.indexOf(seatNum);
+      return {
+        reserved: true,
+        gender: existingReservation.genders[index],
+        seatNumber: null,
+      };
+    }
+
+    const userSelection = bookingInfo.find((seat: { seatNumber: number }) => seat.seatNumber === seatNum);
+    return {
+      reserved: false,
+      gender: (userSelection && userSelection.gender) || null,
+    };
+  };
+
+  const handleGenderSelect = (gender: string) => {
+    console.log("booking", bookingInfo);
+    setBookingInfo((prev: any) => {
+      const existingSeat = prev.find((seat: { seatNumber: number }) => seat.seatNumber === selectedSeat);
+      if (existingSeat) {
+        return prev.map((seat: { seatNumber: number }) =>
+          seat.seatNumber === selectedSeat ? { ...seat, gender } : seat
+        );
+      }
+      return [...prev, { seatNumber: selectedSeat, gender }];
+    });
+    setSelectedSeat(null);
+  };
+  const handleUnselectSeat = (seatNumber) => {
+    setBookingInfo((prev) => prev.filter((seat: { seatNumber: number }) => seat.seatNumber !== seatNumber));
+  };
   return (
     <>
       <Dialog>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
             <DialogTitle>Select Seat Number</DialogTitle>
           </DialogHeader>
@@ -92,29 +122,84 @@ export default function Trip({
               </div>
             ))}
           </div>
+          <div className="flex flex-wrap gap-2 items-center">
+            {bookingInfo.map((seat: { seatNumber: number; gender: string }) => (
+              <Badge
+                key={seat.seatNumber}
+                className={`${seat.gender === "male" ? "bg-[#364F6B]" : "bg-[#FC5185]"}`}
+              >
+                {seat.seatNumber}
+                <Button
+                  variant="link"
+                  className="ms-2 p-0 text-white"
+                  onClick={() => handleUnselectSeat(seat.seatNumber)}
+                >
+                  ×
+                </Button>
+              </Badge>
+            ))}
+          </div>
           <div className="mt-4 pt-4 border-t">
             <div className="container-fluid p-0">
               <h5 className="mb-4 text-primary">Select Your Seats</h5>
               <div className="grid grid-cols-5 gap-3 max-w-600px">
-                {Array.from({ length: 20 }, (_, i) => (
-                  <div
-                    key={i + 1}
-                    className="p-3 rounded text-center font-bold cursor-pointer"
-                    onClick={handleSeatClick}
-                  >
-                    {i + 1}
-                  </div>
-                ))}
+                {Array.from({ length: 20 }, (_, i) => {
+                  const seatNum = i + 1;
+                  const isSelected = bookingInfo.some(
+                    (seat: { seatNumber: number }) => seat.seatNumber === seatNum
+                  );
+                  const { gender, reserved } = getSeatInfo(seatNum);
+
+                  return (
+                    <Popover key={seatNum}>
+                      <PopoverTrigger asChild>
+                        <div
+                          className={`p-3 rounded text-center font-bold cursor-pointer ${
+                            reserved || isSelected
+                              ? gender === "male"
+                                ? "bg-[#364F6B]"
+                                : "bg-[#FC5185]"
+                              : "bg-[#F5F5F5]"
+                          }`}
+                          onClick={(event) => handleSeatClick(event, seatNum)}
+                        >
+                          {seatNum}
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent side="top" align="center" className="w-80">
+                        Select Gender for Seat
+                        <div className="flex justify-around gap-3">
+                          {["male", "female"].map((gender) => (
+                            <div
+                              key={gender}
+                              className="text-center p-2 rounded cursor-pointer"
+                              onClick={() => handleGenderSelect(gender)}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className={`w-[20px] h-[20px] rounded-[4px] ${
+                                    gender === "male" ? "bg-[#364F6B]" : "bg-[#FC5185]"
+                                  }`}
+                                />
+                                <span>{gender.charAt(0).toUpperCase()}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  );
+                })}
               </div>
             </div>
           </div>
-
           <DialogFooter>
-            <Button type="submit">Done</Button>
+            <Button onClick={() => alert("proceed")} className="bg-green-900">
+              Proceed
+            </Button>
           </DialogFooter>
         </DialogContent>
         <div className="mb-6 mt-4 border border-gray-300 rounded-2xl bg-[#f9fafb] p-8 w-[90%] max-w-4xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-8 shadow-lg">
-          {/* Left: Departure and Arrival Info */}
           <div className="flex flex-col sm:flex-row gap-12 border-b lg:border-b-0 lg:border-r border-gray-300 pb-6 lg:pb-0 lg:pr-8">
             {/* Departure */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-1">
@@ -135,8 +220,6 @@ export default function Trip({
               <small className="text-gray-600 text-sm">{arrivalCity || "N/A"}</small>
             </div>
           </div>
-
-          {/* Middle: Pricing */}
           <div className="flex flex-col gap-6 text-center border-b lg:border-b-0 lg:border-r border-gray-300 pb-6 lg:pb-0 lg:pr-8">
             <div>
               <span className="text-gray-500 text-sm">Economy className</span>
@@ -151,8 +234,6 @@ export default function Trip({
               </h5>
             </div>
           </div>
-
-          {/* Right: Book Now Button */}
           <div className="flex justify-center items-center">
             <DialogTrigger asChild>
               <Button
