@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Badge } from "./ui/badge";
+import { transformSeatsData } from "../utils";
 interface TripProps {
   departureDate?: string;
   departureTime?: string;
@@ -47,13 +48,7 @@ export default function Trip({
       setSelectedSeat(selectedSeat == seatNumber ? null : seatNumber);
     }
   };
-  function transformSeatsData(data) {
-    return data?.map((item) => ({
-      seat_numbers: item?.booked_seats?.[0]?.seat_no || [],
-      genders: item?.booked_seats?.[0]?.gender || [],
-      status: item?.status || "unknown",
-    }));
-  }
+
   const getSeatInfo = (seatNum: number) => {
     if (!bookingInfo) return { reserved: false, gender: null };
     const reservations = transformSeatsData(bookingInfo);
