@@ -49,6 +49,7 @@ export default function TripReview() {
                 <span>Duration</span>
               </div>
             </div>
+            <div>{/* <SeatBadgeList  /> */}</div>
           </div>
           <div className="w-[30%] pl-[25px] pr-[25px] flex flex-col gap-[2rem] bg-red-400">
             <div className="flex flex-col gap-5">

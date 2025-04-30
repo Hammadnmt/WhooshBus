@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Badge } from "./ui/badge";
-import { transformSeatsData } from "../utils";
+import { useSeatSelection } from "../hooks/useSeatInformationHook";
+import { SeatBadgeList } from "./SeatBadgeList";
+import { SeatBox } from "./SeatBox";
 interface TripProps {
   departureDate?: string;
   departureTime?: string;
@@ -15,6 +15,10 @@ interface TripProps {
   businessPrice?: number;
   onBookNow?: () => void;
 }
+type Seat = {
+  seatNumber: number;
+  gender: string;
+};
 export default function Trip({
   departureDate,
   departureTime,
@@ -26,69 +30,14 @@ export default function Trip({
   businessPrice,
   onBookNow,
 }: TripProps) {
-  const [bookingInfo, setBookingInfo] = useState([]);
-  const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
-
-  const COLORS = {
-    primary: "#364F6B",
-    secondary: "#3FC1C9",
-    light: "#F5F5F5",
-    accent: "#FC5185",
-  };
-  const handleSeatClick = (event, seatNumber: number) => {
-    const isAlreadySelected = bookingInfo.some(
-      (seat: { seatNumber: number }) => seat.seatNumber === seatNumber
-    );
-
-    if (isAlreadySelected) {
-      setBookingInfo((prev) => prev.filter((seat: { seatNumber: number }) => seat.seatNumber !== seatNumber));
-      setSelectedSeat(null);
-    } else {
-      console.log("elseee");
-      setSelectedSeat(selectedSeat == seatNumber ? null : seatNumber);
-    }
-  };
-
-  const getSeatInfo = (seatNum: number) => {
-    if (!bookingInfo) return { reserved: false, gender: null };
-    const reservations = transformSeatsData(bookingInfo);
-
-    const existingReservation = reservations.find((reservation) =>
-      reservation.seat_numbers.includes(seatNum)
-    );
-
-    if (existingReservation) {
-      const index = existingReservation.seat_numbers.indexOf(seatNum);
-      return {
-        reserved: true,
-        gender: existingReservation.genders[index],
-        seatNumber: null,
-      };
-    }
-
-    const userSelection = bookingInfo.find((seat: { seatNumber: number }) => seat.seatNumber === seatNum);
-    return {
-      reserved: false,
-      gender: (userSelection && userSelection.gender) || null,
-    };
-  };
-
-  const handleGenderSelect = (gender: string) => {
-    console.log("booking", bookingInfo);
-    setBookingInfo((prev: any) => {
-      const existingSeat = prev.find((seat: { seatNumber: number }) => seat.seatNumber === selectedSeat);
-      if (existingSeat) {
-        return prev.map((seat: { seatNumber: number }) =>
-          seat.seatNumber === selectedSeat ? { ...seat, gender } : seat
-        );
-      }
-      return [...prev, { seatNumber: selectedSeat, gender }];
-    });
-    setSelectedSeat(null);
-  };
-  const handleUnselectSeat = (seatNumber) => {
-    setBookingInfo((prev) => prev.filter((seat: { seatNumber: number }) => seat.seatNumber !== seatNumber));
-  };
+  const [bookingInfo, setBookingInfo] = useState<Seat[]>([]);
+  const [selectSeat, setSelectedSeat] = useState<number | null>(null);
+  const { getSeatInfo, handleGenderSelect, handleSeatClick, handleUnselectSeat } = useSeatSelection({
+    bookingInfo,
+    setBookingInfo,
+    selectSeat,
+    setSelectedSeat,
+  });
   return (
     <>
       <Dialog>
@@ -96,43 +45,8 @@ export default function Trip({
           <DialogHeader>
             <DialogTitle>Select Seat Number</DialogTitle>
           </DialogHeader>
-          <div className="flex gap-4 mb-4">
-            {[
-              { color: COLORS.primary, label: "Male" },
-              { color: COLORS.accent, label: "Female" },
-              { color: COLORS.light, label: "Available", border: true },
-            ].map(({ color, label, border }) => (
-              <div key={label} className="flex items-center">
-                <div
-                  className="me-2"
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    borderRadius: "4px",
-                    backgroundColor: color,
-                    ...(border && { border: "1px solid #ddd" }),
-                  }}
-                />
-                <span>{label}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-2 items-center">
-            {bookingInfo.map((seat: { seatNumber: number; gender: string }) => (
-              <Badge
-                key={seat.seatNumber}
-                className={`${seat.gender === "male" ? "bg-[#364F6B]" : "bg-[#FC5185]"}`}
-              >
-                {seat.seatNumber}
-                <Button
-                  variant="link"
-                  className="ms-2 p-0 text-white"
-                  onClick={() => handleUnselectSeat(seat.seatNumber)}
-                >
-                  ×
-                </Button>
-              </Badge>
-            ))}
+          <div>
+            <SeatBadgeList bookingInfo={bookingInfo} handleUnselectSeat={handleUnselectSeat} />
           </div>
           <div className="mt-4 pt-4 border-t">
             <div className="container-fluid p-0">
@@ -146,43 +60,15 @@ export default function Trip({
                   const { gender, reserved } = getSeatInfo(seatNum);
 
                   return (
-                    <Popover key={seatNum}>
-                      <PopoverTrigger asChild>
-                        <div
-                          className={`p-3 rounded text-center font-bold cursor-pointer ${
-                            reserved || isSelected
-                              ? gender === "male"
-                                ? "bg-[#364F6B]"
-                                : "bg-[#FC5185]"
-                              : "bg-[#F5F5F5]"
-                          }`}
-                          onClick={(event) => handleSeatClick(event, seatNum)}
-                        >
-                          {seatNum}
-                        </div>
-                      </PopoverTrigger>
-                      <PopoverContent side="top" align="center" className="w-80">
-                        Select Gender for Seat
-                        <div className="flex justify-around gap-3">
-                          {["male", "female"].map((gender) => (
-                            <div
-                              key={gender}
-                              className="text-center p-2 rounded cursor-pointer"
-                              onClick={() => handleGenderSelect(gender)}
-                            >
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={`w-[20px] h-[20px] rounded-[4px] ${
-                                    gender === "male" ? "bg-[#364F6B]" : "bg-[#FC5185]"
-                                  }`}
-                                />
-                                <span>{gender.charAt(0).toUpperCase()}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    <SeatBox
+                      key={seatNum}
+                      seatNum={seatNum}
+                      reserved={reserved}
+                      gender={gender}
+                      isSelected={isSelected}
+                      onSeatClick={handleSeatClick}
+                      onGenderSelect={handleGenderSelect}
+                    />
                   );
                 })}
               </div>
@@ -202,12 +88,10 @@ export default function Trip({
               <h4 className="text-gray-800 font-bold text-xl">{departureTime || "N/A"}</h4>
               <small className="text-gray-600 text-sm">{departureCity || "N/A"}</small>
             </div>
-
             {/* Arrow */}
             <div className="hidden lg:flex items-center justify-center">
               <span className="text-gray-400 text-2xl">→</span>
             </div>
-
             {/* Arrival */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-1">
               <small className="text-gray-500 text-xs">{arrivalDate || "N/A"}</small>
