@@ -1,3 +1,4 @@
+import React from "react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import Timeline from "./ui/timeline";
@@ -10,7 +11,7 @@ export default function TripReview() {
           <h2 className="text-white font-bold text-3xl">Review Your Trip</h2>
           <p className="p-0 text-white opacity-50">Check you travel details</p>
         </div>
-        <div className="w-full flex pl-[30px] bg-white">
+        <div className="w-full flex pl-[30px] bg-white rounded-bl-[25px]">
           <div className="w-[70%] p-[25px]">
             <div className="flex gap-10">
               <div className="flex gap-5">Icon</div>
@@ -51,7 +52,7 @@ export default function TripReview() {
             </div>
             <div>{/* <SeatBadgeList  /> */}</div>
           </div>
-          <div className="w-[30%] pl-[25px] pr-[25px] flex flex-col gap-[2rem] bg-red-400">
+          <div className="w-[30%] pl-[25px] pr-[25px] flex flex-col gap-[2rem] rounded-br-[25px] bg-red-400">
             <div className="flex flex-col gap-5">
               <div className="flex gap-5 pt-[25px] pl-[25px]">
                 <span className="font-light text-[18px]">PKR</span>
