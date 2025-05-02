@@ -1,4 +1,5 @@
-import { CirclePlus, CircleMinus, Circle } from "lucide-react";
+import { CirclePlus, CircleMinus } from "lucide-react";
+import React from "react";
 
 export default function Timeline() {
   return (

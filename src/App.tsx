@@ -4,15 +4,19 @@ import MainNav from "./components/MainNav";
 import Trip from "./components/Trip";
 import TripReview from "./components/TripReview";
 import Booking from "./components/Booking";
+import Login from "./components/Login";
+import LoginRegisterPage from "./pages/LoginRegisterPage";
 
 function App() {
   return (
     <>
-      <MainNav />
+      {/* <MainNav /> */}
       {/* <Home />
       <Trip />
       <TripReview /> */}
-      <Booking />
+      {/* <Booking /> */}
+      {/* <Login /> */}
+      <LoginRegisterPage />
     </>
   );
 }
