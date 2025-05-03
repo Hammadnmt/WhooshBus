@@ -11,11 +11,10 @@ function App() {
   return (
     <>
       {/* <MainNav /> */}
-      {/* <Home />
-      <Trip />
-      <TripReview /> */}
+      <Home />
+      {/* <Trip /> */}
+      {/* <TripReview /> */}
       {/* <Booking /> */}
-      {/* <Login /> */}
       <LoginRegisterPage />
     </>
   );

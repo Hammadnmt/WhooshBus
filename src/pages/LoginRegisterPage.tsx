@@ -3,32 +3,32 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { BusIcon } from "lucide-react";
 import GoogleIcon from "../assets/googleSvg";
+import useInputHandlerHook from "../hooks/useInputHandlerHook";
 
 export default function LoginRegisterPage() {
+  const { handleInputChange, formData } = useInputHandlerHook();
+  console.log("form", formData);
   return (
-    <div className="flex justify-center items-center w-full h-screen bg-gray-50 px-4 md:px-12">
-      {/* Left Side Content */}
-      <div className="w-1/2 hidden md:flex justify-center">
-        <div className="flex flex-col justify-center items-start gap-10 px-10 py-16 bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-2xl shadow-md max-w-md h-fit">
-          <div>
-            <h1 className="text-3xl font-semibold text-blue-800">Safe. Reliable. Easy.</h1>
-            <p className="text-sm text-gray-600 mt-2">Feel secure every mile you ride.</p>
-          </div>
-          <div>
-            <h1 className="text-3xl font-semibold text-blue-800">Plan with Confidence</h1>
-            <p className="text-sm text-gray-600 mt-2">Book, track, and ride — your way.</p>
-          </div>
-          <div>
-            <h1 className="text-3xl font-semibold text-blue-800">Trusted Nationwide</h1>
-            <p className="text-sm text-gray-600 mt-2">Thousands ride with WhooshBus daily.</p>
-          </div>
+    <div className="flex justify-center items-center w-full h-screen bg-gray-50 px-4 overflow-visible">
+      <div className="flex flex-col justify-center items-start gap-[1rem] bg-red-300 w-[80%] px-[4rem]">
+        <div>
+          <h1 className="text-3xl">WhooshBus</h1>
+        </div>
+        <div>
+          <h1 className="font-bold text-2xl">
+            Travel Smart, <br /> Travel Safe
+          </h1>
+        </div>
+        <div>
+          <i className="text-sm text-muted-foreground mt-2">
+            Join a growing community of happy travelers. Our platform
+            <br /> is built on reliability, transparency, and your satisfaction.
+          </i>
         </div>
       </div>
 
-      {/* Right Side Form */}
-      <div className="w-full md:w-1/2 px-4 md:px-10">
+      <div className="w-full md:w-1/2 px-10">
         <Tabs defaultValue="Login" className="w-full max-w-md mx-auto">
           <TabsList className="grid grid-cols-2 bg-gray-100 rounded-md mb-6">
             <TabsTrigger
@@ -52,12 +52,18 @@ export default function LoginRegisterPage() {
                 <CardTitle className="text-2xl font-semibold">Sign in</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Input id="email" placeholder="johndoe@gmail.com" className="bg-gray-100 rounded-md" />
                 <Input
-                  id="password"
+                  name="email"
+                  placeholder="johndoe@gmail.com"
+                  className="bg-gray-100 rounded-md"
+                  onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+                />
+                <Input
+                  name="password"
                   type="password"
                   placeholder="Enter your password"
                   className="bg-gray-100 rounded-md"
+                  onChange={(e) => handleInputChange(e.target.name, e.target.value)}
                 />
               </CardContent>
               <CardFooter className="flex flex-col gap-4 mt-6">
@@ -79,19 +85,32 @@ export default function LoginRegisterPage() {
                 <CardTitle className="text-2xl font-semibold">Sign up</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Input id="fname" placeholder="First Name" className="bg-gray-100 rounded-md" />
-                <Input id="email" type="email" placeholder="Email" className="bg-gray-100 rounded-md" />
                 <Input
-                  id="password"
+                  name="fname"
+                  placeholder="First Name"
+                  className="bg-gray-100 rounded-md"
+                  onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+                />
+                <Input
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  className="bg-gray-100 rounded-md"
+                  onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+                />
+                <Input
+                  name="password"
                   type="password"
                   placeholder="Password"
                   className="bg-gray-100 rounded-md"
+                  onChange={(e) => handleInputChange(e.target.name, e.target.value)}
                 />
                 <Input
-                  id="cpassword"
+                  name="cpassword"
                   type="password"
                   placeholder="Confirm Password"
                   className="bg-gray-100 rounded-md"
+                  onChange={(e) => handleInputChange(e.target.name, e.target.value)}
                 />
               </CardContent>
               <CardFooter className="flex flex-col gap-4 mt-6">
