@@ -1,13 +1,36 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import GoogleIcon from "../assets/googleSvg";
 import useInputHandlerHook from "../hooks/useInputHandlerHook";
+import { useLoginUserMutation, useRegisterUserMutation } from "../features/auth/authSlice";
+import { sendMagicLink } from "../config/passwordlessAuth";
 
 export default function LoginRegisterPage() {
   const { handleInputChange, formData } = useInputHandlerHook();
+  const [loginUser, { data, error, isLoading, isSuccess }] = useLoginUserMutation();
+  const [registerUser, { isSuccess: userRegistered }] = useRegisterUserMutation();
+  const signInUser = () => {
+    try {
+      loginUser(formData).then((result) => {
+        console.log("result", result);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const signUpUser = () => {
+    try {
+      registerUser(formData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    console.log("hurraaaaah");
+  }, [isSuccess, userRegistered]);
   console.log("form", formData);
   return (
     <div className="flex justify-center items-center w-full h-screen bg-gray-50 px-4 overflow-visible">
@@ -54,20 +77,16 @@ export default function LoginRegisterPage() {
               <CardContent className="space-y-4">
                 <Input
                   name="email"
-                  placeholder="johndoe@gmail.com"
-                  className="bg-gray-100 rounded-md"
-                  onChange={(e) => handleInputChange(e.target.name, e.target.value)}
-                />
-                <Input
-                  name="password"
-                  type="password"
-                  placeholder="Enter your password"
+                  placeholder="john@example.com"
                   className="bg-gray-100 rounded-md"
                   onChange={(e) => handleInputChange(e.target.name, e.target.value)}
                 />
               </CardContent>
-              <CardFooter className="flex flex-col gap-4 mt-6">
-                <Button className="w-full bg-blue-700 hover:bg-blue-800 transition font-semibold">
+              <CardFooter className="flex flex-col gap-4 mt-[4px] ">
+                <Button
+                  onClick={() => sendMagicLink(formData)}
+                  className="w-full bg-blue-700 hover:bg-blue-800 transition font-semibold"
+                >
                   Continue →
                 </Button>
                 <div className="flex items-center justify-center w-full border border-gray-300 rounded-md px-4 py-2 bg-white gap-2">
@@ -114,7 +133,10 @@ export default function LoginRegisterPage() {
                 />
               </CardContent>
               <CardFooter className="flex flex-col gap-4 mt-6">
-                <Button className="w-full bg-blue-700 hover:bg-blue-800 transition font-semibold">
+                <Button
+                  onClick={signUpUser}
+                  className="w-full bg-blue-700 hover:bg-blue-800 transition font-semibold"
+                >
                   Continue →
                 </Button>
                 <div className="flex items-center justify-center w-full border border-gray-300 rounded-md px-4 py-2 bg-white gap-2">

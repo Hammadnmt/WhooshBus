@@ -1,11 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const baseApi = fetchBaseQuery({
-  baseUrl: "https://buspro-backend-production.up.railway.app/",
+  baseUrl: "http://localhost:3000/api",
   credentials: "include",
 });
 
-const api = createApi({
+export const api = createApi({
+  reducerPath: "api",
   baseQuery: baseApi,
   tagTypes: ["User", "Bus", "Trip", "Booking", "Route"],
   endpoints: () => ({}),
