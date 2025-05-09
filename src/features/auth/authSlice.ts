@@ -1,8 +1,4 @@
 import { api } from "../baseApi";
-// const authSlice=createSlice({
-//     initialState
-// })
-
 const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
     loginUser: builder.mutation({
@@ -15,6 +11,13 @@ const authApi = api.injectEndpoints({
       transformResponse: (response, args, meta) => {
         console.log("response", response);
       },
+    }),
+    handleUser: builder.mutation({
+      query: (userInfo) => ({
+        body: userInfo,
+        url: "/auth/handleuser",
+        method: "POST",
+      }),
     }),
     registerUser: builder.mutation({
       query: (userData) => ({
@@ -29,4 +32,4 @@ const authApi = api.injectEndpoints({
   }),
 });
 
-export const { useLoginUserMutation, useRegisterUserMutation } = authApi;
+export const { useLoginUserMutation, useRegisterUserMutation, useHandleUserMutation } = authApi;

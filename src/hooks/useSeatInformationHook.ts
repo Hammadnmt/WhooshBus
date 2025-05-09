@@ -6,6 +6,7 @@ type Seat = {
 import { transformSeatsData } from "../utils";
 
 interface UseSeatSelectionProps {
+  bookingData: [];
   bookingInfo: Seat[];
   setBookingInfo: React.Dispatch<React.SetStateAction<Seat[]>>;
   setSelectedSeat: React.Dispatch<React.SetStateAction<number | null>>;
@@ -13,6 +14,7 @@ interface UseSeatSelectionProps {
 }
 
 export function useSeatSelection({
+  bookingData,
   bookingInfo,
   setBookingInfo,
   selectSeat,
@@ -45,8 +47,12 @@ export function useSeatSelection({
   };
 
   const getSeatInfo = (seatNum: number) => {
-    const reservations = transformSeatsData(bookingInfo);
-    const existingReservation = reservations.find((r) => r.seat_numbers.includes(seatNum));
+    if (!bookingData) return { reserved: false, gender: null };
+    const reservations = transformSeatsData(bookingData);
+
+    const existingReservation = reservations.find((reservation) =>
+      reservation.seat_numbers.includes(seatNum)
+    );
 
     if (existingReservation) {
       const index = existingReservation.seat_numbers.indexOf(seatNum);
